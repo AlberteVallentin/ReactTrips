@@ -27,10 +27,15 @@ function apiFacade() {
     const getUserRoles = () => {
         const token = getToken();
         if (token != null) {
-            const payloadBase64 = getToken().split('.')[1];
-            const decodedClaims = JSON.parse(window.atob(payloadBase64));
-            const roles = decodedClaims.roles;
-            return roles;
+            try {
+                const payloadBase64 = getToken().split('.')[1];
+                const decodedClaims = JSON.parse(window.atob(payloadBase64));
+                const roles = decodedClaims.roles;
+                return roles;
+            } catch (error) {
+                console.error("Error decoding token:", error);
+                return "";
+            }
         } else return "";
     };
 

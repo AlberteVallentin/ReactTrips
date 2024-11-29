@@ -19,6 +19,15 @@ function App() {
   const [error, setError] = useState(null);
   const [tripDetails, setTripDetails] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    if (loggedIn) {
+      const roles = facade.getUserRoles(); // Henter roller fra facade
+      console.log('Roles fetched:', roles);
+      setUserRole(roles?.toLowerCase()); // Sørg for små bogstaver for konsistens
+    }
+  }, [loggedIn]);
 
   // Fetch trips and populate categories
   useEffect(() => {
@@ -123,18 +132,17 @@ function App() {
         <Route
           path='/guides'
           element={
-            loggedIn && facade.hasUserAccess('ADMIN', loggedIn) ? (
+            loggedIn && userRole === 'admin' ? (
               <Guides />
             ) : (
               <Navigate to='/trips' />
             )
           }
         />
-
         <Route
           path='/trip/:id'
           element={
-            loggedIn && facade.hasUserAccess('USER', loggedIn) ? (
+            loggedIn && userRole === 'user' ? (
               <TripDetails />
             ) : (
               <Navigate to='/trips' />

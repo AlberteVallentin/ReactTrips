@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import facade from '../util/apiFacade';
+import './Header.css';
 
 const Header = ({ loggedIn, setLoggedIn }) => {
   const [loginCredentials, setLoginCredentials] = useState({
@@ -13,7 +14,6 @@ const Header = ({ loggedIn, setLoggedIn }) => {
     try {
       await facade.login(loginCredentials.username, loginCredentials.password);
       setLoggedIn(true);
-      setLoginCredentials({ username: '', password: '' });
     } catch (error) {
       console.error('Login failed:', error);
     }
@@ -31,35 +31,32 @@ const Header = ({ loggedIn, setLoggedIn }) => {
     });
   };
 
+  const userRoles = facade.getUserRoles().toLowerCase();
+
   return (
-    <header className='p-4 bg-gray-100'>
-      <div className='flex justify-between items-center'>
-        <nav>
-          <Link to='/trips' className='mr-4'>
+    <header className='header'>
+      <div className='header-container'>
+        <nav className='nav-links'>
+          <Link to='/trips' className='nav-link'>
             Trips
           </Link>
-          {facade.hasUserAccess('ADMIN', loggedIn) && (
-            <Link to='/guides' className='mr-4'>
+          {loggedIn && userRoles.includes('admin') && (
+            <Link to='/guides' className='nav-link'>
               Guides
-            </Link>
-          )}
-          {facade.hasUserAccess('USER', loggedIn) && (
-            <Link to='/trip/1' className='mr-4'>
-              Trip Details
             </Link>
           )}
         </nav>
 
         <div>
           {!loggedIn ? (
-            <form onSubmit={performLogin} className='flex gap-2'>
+            <form onSubmit={performLogin} className='login-form'>
               <input
                 type='text'
                 id='username'
                 placeholder='Username'
                 value={loginCredentials.username}
                 onChange={onChange}
-                className='px-2 py-1 border rounded'
+                className='login-input'
               />
               <input
                 type='password'
@@ -67,22 +64,16 @@ const Header = ({ loggedIn, setLoggedIn }) => {
                 placeholder='Password'
                 value={loginCredentials.password}
                 onChange={onChange}
-                className='px-2 py-1 border rounded'
+                className='login-input'
               />
-              <button
-                type='submit'
-                className='px-4 py-1 bg-blue-500 text-white rounded'
-              >
+              <button type='submit' className='button login-button'>
                 Login
               </button>
             </form>
           ) : (
-            <div className='flex items-center gap-4'>
-              <span>Welcome, {loginCredentials.username}</span>
-              <button
-                onClick={logout}
-                className='px-4 py-1 bg-red-500 text-white rounded'
-              >
+            <div className='user-section'>
+              <span className='welcome-text'>Welcome, {userRoles}</span>
+              <button onClick={logout} className='button logout-button'>
                 Logout
               </button>
             </div>
