@@ -1,0 +1,15 @@
+.category-filter {
+  margin-bottom: 20px;
+}
+
+.category-filter label {
+  font-size: 16px;
+  margin-right: 10px;
+}
+
+.category-filter select {
+  padding: 8px;
+  font-size: 16px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}

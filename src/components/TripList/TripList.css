@@ -1,0 +1,32 @@
+.trip-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: flex-start;
+}
+
+.trip-box {
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 8px;
+  width: 300px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.trip-box:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.trip-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.trip-details {
+  font-size: 14px;
+  color: #555;
+}
