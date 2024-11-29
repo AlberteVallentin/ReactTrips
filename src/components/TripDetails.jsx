@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import facade from '../util/apiFacade';
 import './TripDetails.css';
 
 const TripDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [trip, setTrip] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -24,13 +25,22 @@ const TripDetails = () => {
     fetchTripDetails();
   }, [id]);
 
-  if (loading) return <div>Loading trip details...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!trip) return <div>Trip not found</div>;
+  // Når modalen lukkes, navigerer vi tilbage til trip listen
+  const handleClose = () => {
+    navigate('/trips');
+  };
+
+  if (loading)
+    return <div className='modal-overlay'>Loading trip details...</div>;
+  if (error) return <div className='modal-overlay'>Error: {error}</div>;
+  if (!trip) return <div className='modal-overlay'>Trip not found</div>;
 
   return (
-    <div className='trip-details-container'>
-      <div className='trip-details-card'>
+    <div className='modal-overlay' onClick={handleClose}>
+      <div className='modal-content' onClick={(e) => e.stopPropagation()}>
+        <button className='close-button' onClick={handleClose}>
+          &times;
+        </button>
         <h1>{trip.name}</h1>
 
         <div className='trip-info'>

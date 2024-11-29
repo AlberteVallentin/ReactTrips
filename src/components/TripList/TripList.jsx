@@ -1,7 +1,14 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './TripList.css';
 
-const TripList = ({ trips, onTripClick }) => {
+const TripList = ({ trips }) => {
+  const navigate = useNavigate();
+
+  const handleTripClick = (tripId) => {
+    navigate(`/trip/${tripId}`);
+  };
+
   return (
     <div className='trip-container'>
       {trips.map((trip) => {
@@ -12,7 +19,7 @@ const TripList = ({ trips, onTripClick }) => {
           <div
             className='trip-box'
             key={trip.id}
-            onClick={() => onTripClick(trip.id)}
+            onClick={() => handleTripClick(trip.id)}
           >
             <div className='trip-title'>{trip.name}</div>
             <div className='trip-details'>

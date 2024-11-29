@@ -6,7 +6,6 @@ import Guides from './components/Guides';
 import TripDetails from './components/TripDetails';
 import Header from './components/Header';
 import TripList from './components/TripList/TripList';
-import TripModal from './components/TripModal/TripModal';
 import CategoryFilter from './components/CategoryFilter/CategoryFilter';
 
 function App() {
@@ -17,19 +16,15 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [tripDetails, setTripDetails] = useState(null);
-  const [showModal, setShowModal] = useState(false);
   const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
     if (loggedIn) {
-      const roles = facade.getUserRoles(); // Henter roller fra facade
-      console.log('Roles fetched:', roles);
-      setUserRole(roles?.toLowerCase()); // Sørg for små bogstaver for konsistens
+      const roles = facade.getUserRoles();
+      setUserRole(roles?.toLowerCase());
     }
   }, [loggedIn]);
 
-  // Fetch trips and populate categories
   useEffect(() => {
     const fetchTrips = async () => {
       try {
@@ -58,7 +53,6 @@ function App() {
     fetchTrips();
   }, []);
 
-  // Handle category selection
   const handleCategoryChange = (event) => {
     const category = event.target.value;
     setSelectedCategory(category);
@@ -69,37 +63,6 @@ function App() {
       const filtered = trips.filter((trip) => trip.category === category);
       setFilteredTrips(filtered);
     }
-  };
-
-  // Fetch trip details
-  const handleTripClick = async (tripId) => {
-    console.log(`Trip clicked: ${tripId}`);
-    try {
-      const token = facade.getToken(); // Antag, at du har en metode til at hente token
-      const response = await fetch(
-        `https://tripapi.cphbusinessapps.dk/api/trips/${tripId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log('Response:', response);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch trip details for ID: ${tripId}`);
-      }
-      const trip = await response.json();
-      console.log('Trip details:', trip);
-      setTripDetails(trip);
-      setShowModal(true);
-    } catch (error) {
-      console.error('Error fetching trip details:', error);
-    }
-  };
-
-  const closeModal = () => {
-    setShowModal(false);
-    setTripDetails(null);
   };
 
   if (loading) return <div>Loading...</div>;
@@ -121,14 +84,10 @@ function App() {
                 selectedCategory={selectedCategory}
                 onCategoryChange={handleCategoryChange}
               />
-              <TripList trips={filteredTrips} onTripClick={handleTripClick} />
-              {showModal && (
-                <TripModal tripDetails={tripDetails} onClose={closeModal} />
-              )}
+              <TripList trips={filteredTrips} />
             </div>
           }
         />
-
         <Route
           path='/guides'
           element={
