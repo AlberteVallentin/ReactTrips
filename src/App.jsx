@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
-import './reset.css';
-import CategoryFilter from './components/CategoryFilter/CategoryFilter';
+import facade from './util/apiFacade';
+import Guides from './components/Guides';
+import TripDetails from './components/TripDetails';
+import Header from './components/Header';
 import TripList from './components/TripList/TripList';
 import TripModal from './components/TripModal/TripModal';
+import CategoryFilter from './components/CategoryFilter/CategoryFilter';
 
 function App() {
+  const [loggedIn, setLoggedIn] = useState(false);
   const [trips, setTrips] = useState([]);
   const [filteredTrips, setFilteredTrips] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -61,8 +66,14 @@ function App() {
   const handleTripClick = async (tripId) => {
     console.log(`Trip clicked: ${tripId}`);
     try {
+      const token = facade.getToken(); // Antag, at du har en metode til at hente token
       const response = await fetch(
-        `https://tripapi.cphbusinessapps.dk/api/trips/${tripId}`
+        `https://tripapi.cphbusinessapps.dk/api/trips/${tripId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       console.log('Response:', response);
       if (!response.ok) {
@@ -86,22 +97,51 @@ function App() {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className='trips'>
-      <h1>Trips</h1>
-      {/* Category filter */}
-      <CategoryFilter
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onCategoryChange={handleCategoryChange}
-      />
+    <div>
+      <Header loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
 
-      {/* Trip list */}
-      <TripList trips={filteredTrips} onTripClick={handleTripClick} />
+      <Routes>
+        <Route path='/' element={<Navigate to='/trips' replace />} />
+        <Route
+          path='/trips'
+          element={
+            <div className='trips'>
+              <h1>Trips</h1>
+              <CategoryFilter
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onCategoryChange={handleCategoryChange}
+              />
+              <TripList trips={filteredTrips} onTripClick={handleTripClick} />
+              {showModal && (
+                <TripModal tripDetails={tripDetails} onClose={closeModal} />
+              )}
+            </div>
+          }
+        />
 
-      {/* Modal for trip details */}
-      {showModal && (
-        <TripModal tripDetails={tripDetails} onClose={closeModal} />
-      )}
+        <Route
+          path='/guides'
+          element={
+            loggedIn && facade.hasUserAccess('ADMIN', loggedIn) ? (
+              <Guides />
+            ) : (
+              <Navigate to='/trips' />
+            )
+          }
+        />
+
+        <Route
+          path='/trip/:id'
+          element={
+            loggedIn && facade.hasUserAccess('USER', loggedIn) ? (
+              <TripDetails />
+            ) : (
+              <Navigate to='/trips' />
+            )
+          }
+        />
+      </Routes>
     </div>
   );
 }
