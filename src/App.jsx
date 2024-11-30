@@ -1,12 +1,18 @@
-import { useState, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import './App.css';
-import facade from './util/apiFacade';
+import {
+  Route,
+  createBrowserRouter,
+  createRoutesFromElements,
+  RouterProvider,
+  Navigate,
+} from 'react-router-dom';
+import MainLayout from './components/MainLayout';
+import TripList from './components/TripList/TripList';
 import Guides from './components/Guides';
 import TripDetails from './components/TripDetails';
-import Header from './components/Header';
-import TripList from './components/TripList/TripList';
 import CategoryFilter from './components/CategoryFilter/CategoryFilter';
+import { useState, useEffect } from 'react';
+import facade from './util/apiFacade';
+import './App.css';
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -31,9 +37,8 @@ function App() {
         const response = await fetch(
           'https://tripapi.cphbusinessapps.dk/api/trips'
         );
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Error: ${response.status}`);
+
         const data = await response.json();
         setTrips(data);
         setFilteredTrips(data);
@@ -56,26 +61,28 @@ function App() {
   const handleCategoryChange = (event) => {
     const category = event.target.value;
     setSelectedCategory(category);
-
-    if (category === 'All') {
-      setFilteredTrips(trips);
-    } else {
-      const filtered = trips.filter((trip) => trip.category === category);
-      setFilteredTrips(filtered);
-    }
+    setFilteredTrips(
+      category === 'All'
+        ? trips
+        : trips.filter((trip) => trip.category === category)
+    );
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-
-  return (
-    <div>
-      <Header loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
-
-      <Routes>
-        <Route path='/' element={<Navigate to='/trips' replace />} />
+  const router = createBrowserRouter(
+    createRoutesFromElements(
+      <Route
+        path='/'
+        element={
+          <MainLayout
+            loggedIn={loggedIn}
+            setLoggedIn={setLoggedIn}
+            userRole={userRole}
+          />
+        }
+      >
+        <Route index element={<Navigate to='/trips' replace />} />
         <Route
-          path='/trips'
+          path='trips'
           element={
             <div className='trips'>
               <h1>Trips</h1>
@@ -89,7 +96,7 @@ function App() {
           }
         />
         <Route
-          path='/guides'
+          path='guides'
           element={
             loggedIn && userRole === 'admin' ? (
               <Guides />
@@ -99,7 +106,7 @@ function App() {
           }
         />
         <Route
-          path='/trip/:id'
+          path='trip/:id'
           element={
             loggedIn && userRole === 'user' ? (
               <TripDetails />
@@ -108,9 +115,14 @@ function App() {
             )
           }
         />
-      </Routes>
-    </div>
+      </Route>
+    )
   );
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+
+  return <RouterProvider router={router} />;
 }
 
 export default App;
